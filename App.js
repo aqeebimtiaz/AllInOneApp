@@ -11,6 +11,7 @@ import {
 	View,
 	Text,
 	StatusBar,
+	TextInput,
 	Dimensions,
 	StyleSheet,
 	ScrollView,
@@ -22,6 +23,32 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 const screenHeight = Dimensions.get("window").height;
 
 export default class App extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			cityname: '',
+			time: '',
+			name: '',
+			icon: '',
+			description: '',
+			temperature: 0.00,
+			forecast: [],
+			latitude: '',
+			longitude: '',
+			humidity: '',
+			windSpeed: '',
+			cloudPercentage: '',
+			loading: false,
+			error: false
+		}
+    	this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	handleSubmit() {
+		// this.getWeatherInfo(this.state.cityname);
+		alert('Cityname: ' + this.state.cityname);
+	}
+
 	render() {
 		return (
 			<>
@@ -42,7 +69,16 @@ export default class App extends React.Component {
 
 							<Text style={styles.title}>Search For City</Text>
 
+							<TextInput 
+								style={styles.searchInput} 
+								value = {this.state.cityname} 
+								onChangeText = {(cityname) => this.setState({cityname})} 
+								onSubmitEditing={this.handleSubmit} 
+								returnKeyType={'search'}
+							/>
+
 							<View style={styles.sectionContainer}>
+
 								<Text style={styles.sectionTitle}>Step One</Text>
 								<Text style={styles.sectionDescription}>
 									Edit <Text style={styles.highlight}>App.js</Text> to change this
@@ -81,8 +117,19 @@ const styles = StyleSheet.create({
 		fontSize: 25,
 		textAlign: 'center'
 	},
+	searchInput: {
+		borderBottomWidth: 2,
+		height: 50,
+		padding: 4,
+		marginRight: 5,
+		fontSize: 23,
+		// borderWidth: 1,
+		borderColor: 'black',
+		borderRadius: 8,
+		color: 'black'
+	},
 	sectionContainer: {
-		marginTop: 32,
+		// marginTop: 32,
 		paddingHorizontal: 24,
 	},
 	sectionTitle: {
