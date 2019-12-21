@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -10,6 +11,7 @@ import React from 'react';
 import {
 	View,
 	Text,
+	Alert,
 	StatusBar,
 	TextInput,
 	Dimensions,
@@ -41,19 +43,83 @@ export default class App extends React.Component {
 			loading: false,
 			error: false
 		}
-    	this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	processData(data){
+		if (data.cod == 404){
+			let message = data.message.replace(/^\w/, c => c.toUpperCase());
+			Alert.alert(message);
+		}
+		else if (data.cod == 200){
+			var time = this.convertTime(data.dt);
+			var sunrise = this.convertTime(data.sys.sunrise);
+			var sunset = this.convertTime(data.sys.sunset);
+			this.setState({
+				forecast: data,
+				time: time,
+				name: data.name,
+				icon: data.weather[0].icon,
+				description: data.weather[0].description,
+				temperature: data.main.temp,
+				humidity: data.main.humidity,
+				windSpeed: data.wind.speed,
+				cloudPercentage: data.clouds.all,
+				sunrise: sunrise,
+				sunset: sunset,
+			});
+			// console.log("after set state:")
+			// console.log(data.weather[0].icon)
+		}
+	}
+
+	convertTime(timeStamp){
+		let time;
+
+		// Create a new date from the passed date time
+		var date = new Date(timeStamp*1000);
+
+		// Hours part from the timestamp
+		var hours = date.getHours() - (date.getHours() >= 12 ? 12 : 0);
+
+		// Minutes part from the timestamp
+		var minutes = "0" + date.getMinutes();
+		var period = date.getHours() >= 12 ? ' PM' : ' AM';
+
+		time = hours + ':' + minutes.substr(-2) + period;
+		return time;
+	}
+
+	// Get weather by city name
+	getWeatherInfo(){
+		let url = 'https://api.openweathermap.org/data/2.5/weather?q=' + this.state.cityname + '&units=metric&appid=ce0cb4b99e8ee814c20a4f76609c8196'
+		fetch(url)
+		.then(response => response.json())
+		.then(data => {
+			console.log(data);
+			// let tempData = JSON.stringify(data);
+          	// console.log(tempData);
+			// alert(tempData);
+			this.processData(data);
+		})
+		.catch(function(error){
+			console.log(error.message);
+			throw error.message;
+		});
+
+		// this.getForecast();
 	}
 
 	handleSubmit() {
-		// this.getWeatherInfo(this.state.cityname);
-		alert('Cityname: ' + this.state.cityname);
+		this.getWeatherInfo(this.state.cityname);
+		// alert('Cityname: ' + this.state.cityname);
 	}
 
 	render() {
 		return (
 			<>
 				<StatusBar backgroundColor="grey" barStyle="light-content" showHideTransition='slide' animated hidden />
-				
+
 				<SafeAreaView>
 					<ScrollView
 						contentInsetAdjustmentBehavior="automatic"
@@ -69,12 +135,14 @@ export default class App extends React.Component {
 
 							<Text style={styles.title}>Search For City</Text>
 
-							<TextInput 
-								style={styles.searchInput} 
-								value = {this.state.cityname} 
-								onChangeText = {(cityname) => this.setState({cityname})} 
-								onSubmitEditing={this.handleSubmit} 
+							<TextInput
+								style={styles.searchInput}
+								value = {this.state.cityname}
+								onChangeText = {(cityname) => this.setState({cityname})}
+								onSubmitEditing={this.handleSubmit}
 								returnKeyType={'search'}
+								placeholder="Input City's Name"
+								placeholderTextColor="#6F6F6F"
 							/>
 
 							<View style={styles.sectionContainer}>
@@ -94,7 +162,7 @@ export default class App extends React.Component {
 		);
 
 	}
-};
+}
 
 const styles = StyleSheet.create({
 	scrollView: {
@@ -115,7 +183,7 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		marginBottom: 20,
 		fontSize: 25,
-		textAlign: 'center'
+		textAlign: 'center',
 	},
 	searchInput: {
 		borderBottomWidth: 2,
@@ -126,7 +194,7 @@ const styles = StyleSheet.create({
 		// borderWidth: 1,
 		borderColor: 'black',
 		borderRadius: 8,
-		color: 'black'
+		color: 'black',
 	},
 	sectionContainer: {
 		// marginTop: 32,
